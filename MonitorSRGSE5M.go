@@ -24,12 +24,15 @@ func MonitorSRGSE5M(
 
 	resmap := make(map[string]*[2]int)
 
+	noe := 0
 	for {
 		tnow := time.Now()
 		tstart := tnow.Add(time.Duration(-sm) * time.Minute).Truncate(time.Duration(it) * time.Minute).Add(time.Duration(sm) * time.Minute)
 		tend := tstart.Add(time.Duration(it) * time.Minute)
 		wait := time.Until(tend)
-		log.Printf("tstart %s tend %s wait %+v\n", tstart.Format("2006-01-02 15:04:05"), tend.Format("2006-01-02 15:04:05"), wait)
+		log.Printf("noe=%3d next=> tstart %s tend %s wait %+v\n",
+			noe, tstart.Format("2006-01-02 15:04:05"), tend.Format("2006-01-02 15:04:05"), wait)
+		noe = 0
 		//	待機
 		time.Sleep(wait)
 
@@ -70,6 +73,7 @@ func MonitorSRGSE5M(
 				log.Printf("eventid %s  ct %d\n", eventid, r.Ct)
 				resmap[eventid] = &[2]int{r.Ct, 1}
 			}
+			noe++
 		}
 		for rm := range resmap {
 			if resmap[rm][1] == 0 {

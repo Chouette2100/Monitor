@@ -29,10 +29,11 @@ import (
 
 
 00AA00	新規作成
+00AB00	チェックの対象としたイベントの総数を表示する
 
 */
 
-const Version = "00AA00"
+const Version = "00AB00"
 
 
 
