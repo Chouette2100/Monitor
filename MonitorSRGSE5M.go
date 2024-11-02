@@ -25,14 +25,16 @@ func MonitorSRGSE5M(
 	resmap := make(map[string]*[2]int)
 
 	noe := 0
+	nor := 0
 	for {
 		tnow := time.Now()
 		tstart := tnow.Add(time.Duration(-sm) * time.Minute).Truncate(time.Duration(it) * time.Minute).Add(time.Duration(sm) * time.Minute)
 		tend := tstart.Add(time.Duration(it) * time.Minute)
 		wait := time.Until(tend)
-		log.Printf("noe=%3d next=> tstart %s tend %s wait %+v\n",
-			noe, tstart.Format("2006-01-02 15:04:05"), tend.Format("2006-01-02 15:04:05"), wait)
+		log.Printf("noe=%3d nor=%4d next=> tstart %s tend %s wait %+v\n",
+			noe, nor, tstart.Format("2006-01-02 15:04:05"), tend.Format("2006-01-02 15:04:05"), wait)
 		noe = 0
+		nor = 0
 		//	待機
 		time.Sleep(wait)
 
@@ -61,24 +63,25 @@ func MonitorSRGSE5M(
 			if ct, ok := resmap[eventid]; ok {
 				if r.Ct != ct[0] {
 					if r.Ct > ct[0] {
-						log.Printf("eventid %s  ct %d -> %d\n", eventid, ct[0], r.Ct)
+						log.Printf("        eventid %s  ct %d -> %d\n", eventid, ct[0], r.Ct)
 					} else {
-						log.Printf("\x1b[31meventid %s  ct %d -> %d\x1b[39m\n", eventid, ct[0], r.Ct)
+						log.Printf("        \x1b[31meventid %s  ct %d -> %d\x1b[39m\n", eventid, ct[0], r.Ct)
 					}
 					//
 				}
 				resmap[eventid][0] = r.Ct
 				resmap[eventid][1] = 1
 			} else {
-				log.Printf("eventid %s  ct %d\n", eventid, r.Ct)
+				log.Printf("        eventid %s  ct %d\n", eventid, r.Ct)
 				resmap[eventid] = &[2]int{r.Ct, 1}
 			}
 			noe++
+			nor += r.Ct
 		}
 		for rm := range resmap {
 			if resmap[rm][1] == 0 {
 				if resmap[rm][0] != 0 {
-					log.Printf("\x1b[31meventid %s  ct %d -> 0\x1b[39m\n", rm, resmap[rm][0])
+					log.Printf("        \x1b[31meventid %s  ct %d -> 0\x1b[39m\n", rm, resmap[rm][0])
 				}
 				resmap[rm][0] = 0
 			}
